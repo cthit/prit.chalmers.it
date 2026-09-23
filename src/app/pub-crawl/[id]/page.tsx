@@ -65,6 +65,9 @@ export default async function PubCrawlPage({
   const cookieStore = await cookies();
   const defaultLinearView =
     cookieStore.get('linearScheduleView')?.value === 'true';
+  const preferredHighlightName = cookieStore.get(
+    'scheduleHighlightName'
+  )?.value;
 
   return (
     <>
@@ -167,6 +170,7 @@ export default async function PubCrawlPage({
               schedule={event.schedule}
               eventEndTime={event.endTime}
               currentUserName={nick}
+              preferredHighlightName={preferredHighlightName}
               defaultLinearView={defaultLinearView}
             />
           </Card>

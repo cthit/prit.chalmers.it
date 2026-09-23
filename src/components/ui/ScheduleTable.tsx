@@ -4,13 +4,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MdPerson, MdTableChart, MdViewList } from 'react-icons/md';
 import type { StaffSection } from '@/types/pub-crawl';
 import LinearSchedule from './LinearSchedule';
-import { setLinearScheduleView } from '@/app/actions/cookies';
+import ClientCookieService from '@/services/clientCookieService';
 
 interface ScheduleTableProps {
   timeColumns: Date[];
   schedule: StaffSection[];
   eventEndTime: Date;
   currentUserName?: string;
+  preferredHighlightName?: string;
   defaultLinearView?: boolean;
 }
 
@@ -19,6 +20,7 @@ export default function ScheduleTable({
   schedule,
   eventEndTime,
   currentUserName,
+  preferredHighlightName,
   defaultLinearView = false
 }: ScheduleTableProps) {
   const [now, setNow] = useState(() => new Date());
@@ -40,6 +42,12 @@ export default function ScheduleTable({
     if (currentUserName && uniqueNames.includes(currentUserName)) {
       return currentUserName;
     }
+    if (
+      preferredHighlightName &&
+      uniqueNames.includes(preferredHighlightName)
+    ) {
+      return preferredHighlightName;
+    }
     return '';
   });
 
@@ -48,9 +56,14 @@ export default function ScheduleTable({
     return () => clearInterval(interval);
   }, []);
 
-  const setInternalLinearView = async (value: boolean) => {
-    await setLinearScheduleView(value);
+  const setInternalLinearView = (value: boolean) => {
     setLinearView(value);
+    ClientCookieService.setLinearScheduleView(value);
+  };
+
+  const setInternalSelectedUser = (value: string) => {
+    setSelectedUser(value);
+    ClientCookieService.setScheduleHighlightName(value);
   };
 
   const activeColumnIndex = useMemo(() => {
@@ -69,7 +82,7 @@ export default function ScheduleTable({
           <select
             autoComplete="off"
             value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
+            onChange={(e) => setInternalSelectedUser(e.target.value)}
             className="px-3 py-2 rounded-full text-label-sm bg-surface-container-low text-on-surface-variant border border-outline-variant/20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">Ingen</option>
